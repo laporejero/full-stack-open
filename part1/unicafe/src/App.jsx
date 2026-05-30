@@ -16,15 +16,11 @@ const StatisticsLine = ({ text, value }) => {
 }
 
 const Statistics = ({ good, neutral, bad }) => {
-  if (good === 0 && neutral === 0 && bad === 0) {
-    return (
-      <div>
-        No feedback given
-      </div>
-    )
-  }
-
   const totalFeedback = good + neutral + bad
+
+  if (totalFeedback === 0) {
+    return <div>No feedback given</div>
+  }
 
   const average = (good, neutral, bad) => {
     const calcGood = good * 1
@@ -79,11 +75,9 @@ const App = () => {
   return (
     <div>
       <h1>give feedback</h1>
-
       <Button onClick={handleGoodClick} text={'good'} />
       <Button onClick={handleNeutralClick} text={'neutral'} />
       <Button onClick={handleBadClick} text={'bad'} />
-
       <h1>statistics</h1>
       <Statistics good={good} neutral={neutral} bad={bad} />
     </div>
