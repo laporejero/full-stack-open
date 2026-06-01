@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
+import personService from './services/persons'
 import Filter from './components/Filter'
 import PersonForm from './components/PersonForm'
 import Persons from './components/Persons'
@@ -11,8 +11,8 @@ function App() {
   const [search, setSearch] = useState('')
 
   useEffect(() => {
-    axios
-      .get('http://localhost:3001/persons')
+    personService
+      .getAll()
       .then(response => {
         setPersons(response.data)
       })
@@ -32,13 +32,27 @@ function App() {
       number: newNumber,
     }
 
-    axios
-      .post('http://localhost:3001/persons', personObj)
+    personService
+      .create(personObj)
       .then(response => {
         setPersons(persons.concat(response.data))
         setNewName('')
         setNewNumber('')
       })
+  }
+
+  const deletePersonBy = (id) => {
+    const personToDelete = persons.find(person => person.id === id)
+
+    if (window.confirm(`Delete ${personToDelete.name}?`)) {
+      personService
+        .deleteObj(id)
+        .then(response => {
+          setPersons(persons.filter(person =>
+            person.id !== id
+          ))
+        })
+    }
   }
 
   const handlePersonInput = (event) => setNewName(event.target.value)
@@ -69,7 +83,7 @@ function App() {
       />
 
       <h3>Numbers</h3>
-      <Persons persons={personSearched} />
+      <Persons persons={personSearched} deletePersonBy={deletePersonBy} />
     </div>
   )
 }
