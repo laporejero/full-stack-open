@@ -22,6 +22,7 @@ function App() {
     event.preventDefault()
 
     const existingPerson = persons.find(person => person.name.toLowerCase() === newName.toLowerCase())
+
     if (existingPerson) {
       if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
         const updatePerson = { ...existingPerson, number: newNumber }
@@ -30,13 +31,14 @@ function App() {
           .update(existingPerson.id, updatePerson)
           .then(returnedPerson => {
             setPersons(persons.map(person =>
-              person.id !== existingPerson.id ? person : returnedPerson
+              person.id === existingPerson.id ? returnedPerson : person
             ))
 
             setNewName('')
             setNewNumber('')
           })
       }
+      return
     }
 
     const personObj = {

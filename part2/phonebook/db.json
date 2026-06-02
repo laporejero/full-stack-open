@@ -19,16 +19,6 @@
       "name": "Mary Poppendieck",
       "number": "39-23-6423122",
       "id": "4"
-    },
-    {
-      "name": "Lionel Messi",
-      "number": "12-30-2024",
-      "id": "2hkrHDsxngo"
-    },
-    {
-      "name": "Lionel Messi",
-      "number": "12-30-2024",
-      "id": "tshQWXMwlAE"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"
