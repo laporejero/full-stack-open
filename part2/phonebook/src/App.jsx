@@ -10,7 +10,8 @@ function App() {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [search, setSearch] = useState('')
-  const [successMessage, setSuccessMessage] = useState(null)
+  const [message, setMessage] = useState(null)
+  const [messageType, setMessageType] = useState(null)
 
   useEffect(() => {
     personService
@@ -39,6 +40,14 @@ function App() {
             setNewName('')
             setNewNumber('')
           })
+          .catch(error => {
+            setMessage(`Information of ${existingPerson.name} has already been removed from server`)
+            setMessageType('error')
+            setTimeout(() => {
+              setMessage(null)
+            }, 5000)
+            setPersons(persons.filter(person => person.id !== existingPerson.id))
+          })
       }
       return
     }
@@ -55,9 +64,10 @@ function App() {
         setNewName('')
         setNewNumber('')
 
-        setSuccessMessage(`Added ${returnedPerson.name}`)
+        setMessage(`Added ${returnedPerson.name}`)
+        setMessageType('success')
         setTimeout(() => {
-          setSuccessMessage(null)
+          setMessage(null)
         }, 5000)
       })
   }
@@ -90,7 +100,7 @@ function App() {
     <div>
       <h2>Phonebook</h2>
 
-      <Notification message={successMessage} />
+      <Notification message={message} type={messageType} />
 
       <Filter 
         search={search} 
