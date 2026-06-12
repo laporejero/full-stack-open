@@ -89,17 +89,6 @@ describe('favorite blog', () => {
   })
 })
 
-// describe('most blogs', () => {
-//   test('author with largest number of blogs', () => {
-//     const result = listHelper.mostBlogs(blogs)
-
-//     assert.deepStrictEqual(result, {
-//       author: 'Robert C. Martin',
-//       blogs: 3,
-//     })
-//   })
-// })
-
 describe('most blogs', () => {
   test('author with largest number of blogs', () => {
     const result = listHelper.mostBlogs(blogs)
@@ -107,6 +96,17 @@ describe('most blogs', () => {
     assert.deepStrictEqual(result, {
       author: "Robert C. Martin",
       blogs: 3
+    })
+  })
+})
+
+describe('most likes', () => {
+  test('author whose blog posts have the largest amount of likes', () => {
+    const result = listHelper.mostLikes(blogs)
+
+    assert.deepStrictEqual(result, {
+      author: "Edsger W. Dijkstra",
+      likes: 17
     })
   })
 })
