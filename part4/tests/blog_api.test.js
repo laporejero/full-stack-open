@@ -5,14 +5,31 @@ const supertest = require('supertest')
 const app = require('../app')
 const helper = require('./test_helper.js')
 const Blog = require('../models/blog')
+const bcrypt = require('bcrypt')
+const User = require('../models/user')
 
 const api = supertest(app)
 
+let userId
+
 beforeEach(async () => {
     await Blog.deleteMany({})
+    await User.deleteMany({})
+
+    const passwordHash = await bcrypt.hash('sekret', 10)
+    const user = new User({
+        username: 'root',
+        name: 'User Name',
+        passwordHash
+    })
+
+    const savedUser = await user.save()
+    userId = savedUser._id.toString()
     
-    const blogObjects = helper.initialBlogs
-        .map(blog => new Blog(blog))
+    const blogObjects = helper.initialBlogs.map(blog => 
+        new Blog({ ...blog, user: userId })
+    )
+
     const promiseArray = blogObjects.map(blog => blog.save())
     await Promise.all(promiseArray)
 })
@@ -38,10 +55,11 @@ test('blogs have id property', async () => {
 
 test('a valid blog can be added', async () => {
     const newBlog = {
+        url: 'http://www.fullstackopen.com/',
         title: 'New Blog',
         author: 'Fullstackopen',
-        url: 'http://www.fullstackopen.com/',
         likes: 10,
+        userId: userId
     }
 
     await api
@@ -62,7 +80,8 @@ describe('addition of a new blog', () => {
         const newBlog = {
             title: 'Test Blog',
             author: 'Tester',
-            url: 'http://test.com'
+            url: 'http://test.com',
+            userId: userId
         }
 
         const response = await api
@@ -98,7 +117,8 @@ describe('addition of a new blog', () => {
         const newBlog = {
             title: 'Test blog',
             author: 'fullstackopen',
-            likes: 5
+            likes: 5,
+            user: userId
         }
 
         await api
@@ -146,6 +166,101 @@ describe('updating of a blog', () => {
 
         assert.strictEqual(updatedBlog.likes, 20)
     })
+})
+
+// tests for adding User
+describe('when there is initially one user in db', () => {
+  beforeEach(async () => {
+    await User.deleteMany({})
+
+    const passwordHash = await bcrypt.hash('sekret', 10)
+    const user = new User({ username: 'root', passwordHash })
+
+    await user.save()
+  })
+
+  test('creation succeeds with a fresh username', async () => {
+    const usersAtStart = await helper.usersInDb()
+
+    const newUser = {
+      username: 'mluukkai',
+      name: 'Matti Luukkainen',
+      password: 'salainen',
+    }
+
+    await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
+
+    const usersAtEnd = await helper.usersInDb()
+    assert.strictEqual(usersAtEnd.length, usersAtStart.length + 1)
+
+    const usernames = usersAtEnd.map(u => u.username)
+    assert(usernames.includes(newUser.username))
+  })
+
+  test('creation fails with proper statuscode and message if username already taken', async () => {
+    const usersAtStart = await helper.usersInDb()
+
+    const newUser = {
+      username: 'root',
+      name: 'Superuser',
+      password: 'salainen',
+    }
+
+    const result = await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(400)
+      .expect('Content-Type', /application\/json/)
+
+    const usersAtEnd = await helper.usersInDb()
+    assert(result.body.error.includes('expected `username` to be unique'))
+
+    assert.strictEqual(usersAtEnd.length, usersAtStart.length)
+  })
+})
+
+test('invalid username is not created', async () => {
+    const usersAtStart = await helper.usersInDb()
+
+    const newUser = {
+       username: 'un',
+       name: 'User Name',
+       password: 'password',
+    }
+
+    const result = await api
+       .post('/api/users')
+       .send(newUser)
+       .expect(400)
+       .expect('Content-Type', /application\/json/)
+
+    const usersAtEnd = await helper.usersInDb()
+    assert(result.body.error.includes('shorter than the minimum allowed length'))
+    assert.strictEqual(usersAtEnd.length, usersAtStart.length)
+})
+
+test('invalid password is not created', async () => {
+    const usersAtStart = await helper.usersInDb()
+
+    const newUser = {
+       username: 'user',
+       name: 'User Name',
+       password: 'pw',
+    }
+
+    const result = await api
+       .post('/api/users')
+       .send(newUser)
+       .expect(400)
+       .expect('Content-Type', /application\/json/)
+
+    const usersAtEnd = await helper.usersInDb()
+    assert.strictEqual(result.body.error, 'password must be at least 3 characters long')
+    assert.strictEqual(usersAtEnd.length, usersAtStart.length)
 })
 
 after(async () => {
