@@ -11,6 +11,7 @@ const User = require('../models/user')
 const api = supertest(app)
 
 let userId
+let token
 
 beforeEach(async () => {
     await Blog.deleteMany({})
@@ -25,7 +26,16 @@ beforeEach(async () => {
 
     const savedUser = await user.save()
     userId = savedUser._id.toString()
+
+    const loginResponse = await api
+        .post('/api/login')
+        .send({
+            username: 'root',
+            password: 'sekret'
+        })
     
+    token = loginResponse.body.token
+
     const blogObjects = helper.initialBlogs.map(blog => 
         new Blog({ ...blog, user: userId })
     )
@@ -53,29 +63,47 @@ test('blogs have id property', async () => {
     assert(response.body[0].id)
 })
 
-test('a valid blog can be added', async () => {
-    const newBlog = {
-        url: 'http://www.fullstackopen.com/',
-        title: 'New Blog',
-        author: 'Fullstackopen',
-        likes: 10,
-        userId: userId
-    }
-
-    await api
-        .post('/api/blogs')
-        .send(newBlog)
-        .expect(201)
-        .expect('Content-Type', /application\/json/)
-
-    const blogsAtEnd = await helper.blogsInDb()
-    assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length + 1)
-
-    const blogs = blogsAtEnd.map(blog => blog.title)
-    assert(blogs.includes('New Blog'))
-})
-
 describe('addition of a new blog', () => {
+    test('a valid blog can be added', async () => {
+        const newBlog = {
+            url: 'http://www.fullstackopen.com/',
+            title: 'New Blog',
+            author: 'Fullstackopen',
+            likes: 10
+        }
+
+        await api
+            .post('/api/blogs')
+            .set('Authorization', `Bearer ${token}`)
+            .send(newBlog)
+            .expect(201)
+            .expect('Content-Type', /application\/json/)
+
+        const blogsAtEnd = await helper.blogsInDb()
+        assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length + 1)
+
+        const blogs = blogsAtEnd.map(blog => blog.title)
+        assert(blogs.includes('New Blog'))
+    })
+
+    test('adding a blog fails if a token is not provided', async () => {
+        const newBlog = {
+            url: 'https://reactweekly.com',
+            title: 'Optimizing React Performance',
+            author: 'Marcus Vance',
+        }
+
+        const result = await api
+            .post('/api/blogs')
+            .send(newBlog)
+            .expect(401)
+            .expect('Content-Type', /application\/json/)
+
+        const blogsAtEnd = await helper.blogsInDb()
+        assert.strictEqual(result.body.error, 'token missing or invalid')
+        assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length)
+    })
+
     test('blog with "likes" property missing will default to 0', async () => {
         const newBlog = {
             title: 'Test Blog',
@@ -86,6 +114,7 @@ describe('addition of a new blog', () => {
 
         const response = await api
             .post('/api/blogs')
+            .set('Authorization', `Bearer ${token}`)
             .send(newBlog)
             .expect(201)
             .expect('Content-Type', /application\/json/)
@@ -105,6 +134,7 @@ describe('addition of a new blog', () => {
 
         await api
             .post('/api/blogs')
+            .set('Authorization', `Bearer ${token}`)
             .send(newBlog)
             .expect(400)
         
@@ -123,6 +153,7 @@ describe('addition of a new blog', () => {
 
         await api
             .post('/api/blogs')
+            .set('Authorization', `Bearer ${token}`)
             .send(newBlog)
             .expect(400)
         
@@ -137,7 +168,10 @@ describe('deletion of a blog', () => {
         const blogsAtStart = await helper.blogsInDb()
         const blogToDelete = blogsAtStart[0]
 
-        await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204)
+        await api
+            .delete(`/api/blogs/${blogToDelete.id}`)
+            .set('Authorization', `Bearer ${token}`)
+            .expect(204)
 
         const blogsAtEnd = await helper.blogsInDb()
 
@@ -157,6 +191,7 @@ describe('updating of a blog', () => {
         
         await api
             .put(`/api/blogs/${blogToUpdate.id}`)
+            .set('Authorization', `Bearer ${token}`)
             .send(blogToUpdate)
             .expect(200)
             .expect('Content-Type', /application\/json/)
