@@ -5,10 +5,12 @@ import loginService from './services/login'
 // components
 import LoginForm from './components/LoginForm'
 import Blog from './components/Blog'
+import Notification from './components/Notification'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
-  const [errorMessage, setErrorMessage] = useState(null)
+  const [error, setError] = useState(false)
+  const [notificationMsg, setNotificationMsg] = useState(null)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
@@ -30,6 +32,16 @@ const App = () => {
     }
   }, [])
 
+  const showError = (message) => {
+    setError(true)
+    setNotificationMsg(message)
+
+    setTimeout(() => {
+      setError(false)
+      setNotificationMsg(null)
+    }, 5000)
+  }
+
   const handleLogin = async event => {
     event.preventDefault()
     try {
@@ -41,10 +53,12 @@ const App = () => {
       setUsername('')
       setPassword('')
     } catch {
-      setErrorMessage('wrong credentials')
-      setTimeout(() => {
-        setErrorMessage(null)
-      }, 5000)
+      setError(true)
+      if (username.trim() === '' || password.trim() === '') {
+        showError('username and password must not be empty')
+      } else {
+        showError('wrong username or password')
+      }
     }
   }
 
@@ -57,29 +71,36 @@ const App = () => {
     setUrl('')
   }
 
-  const handleAddBlog = event => {
+  const handleAddBlog = async event => {
     event.preventDefault()
 
-    const blogObject = {
-      title: title,
-      author: author,
-      url: url
-    }
+    try {
+      const blogObject = {
+        title: title,
+        author: author,
+        url: url
+      }
 
-    blogService
-      .create(blogObject)
-      .then(savedBlog => {
-        setBlogs(blogs.concat(savedBlog))
-        setTitle('')
-        setAuthor('')
-        setUrl('')
-      })
+      const savedBlog = await blogService.create(blogObject)
+
+      setBlogs(blogs.concat(savedBlog))
+      setTitle('')
+      setAuthor('')
+      setUrl('')
+      setNotificationMsg(`a new blog ${title} by ${author} added`)
+      setTimeout(() => {
+        setNotificationMsg(null)
+      }, 5000)
+    } catch {
+      showError('failed to create blog')
+    }
   }
 
   if (user === null) {
     return (
       <div>
         <h2>Log in to application</h2>
+        <Notification message={notificationMsg} error={error} />
         <LoginForm 
           handleLogin={handleLogin}
           username={username}
@@ -94,6 +115,7 @@ const App = () => {
   return (
     <div>
       <h2>blogs</h2>
+      <Notification message={notificationMsg} error={error} />
       <p>
         {user.name} logged in 
         <button onClick={handleLogout}>logout</button>
