@@ -96,6 +96,28 @@ const App = () => {
     }
   }
 
+  const deleteBlog = async (blogObject) => {
+    const confirmed = window.confirm(`Remove blog ${blogObject.title} by ${blogObject.author}`)
+
+    if (!confirmed) return
+
+    try {
+      await blogService.remove(blogObject.id)
+
+      setBlogs(prevBlogs =>
+        prevBlogs.filter(blog => blog.id !== blogObject.id)
+      )
+    } catch (error) {
+      let errorMsg
+      if (error.response.status === 403) {
+        errorMsg = 'you are not authorized to delete this blog'
+      } else {
+        errorMsg = 'failed to delete blog'
+      }
+      showNotification(errorMsg, true)
+    }
+  }
+
   if (user === null) {
     return (
       <div>
@@ -128,7 +150,12 @@ const App = () => {
       </Togglable>
 
       {sortedBlogsByLikes.map(blog =>
-        <Blog key={blog.id} blog={blog} updateBlog={updateBlog} />
+        <Blog 
+          key={blog.id} 
+          blog={blog} 
+          updateBlog={updateBlog} 
+          deleteBlog={deleteBlog} 
+        />
       )}
     </div>
   )
