@@ -7,6 +7,7 @@ import LoginForm from './components/LoginForm'
 import Blog from './components/Blog'
 import Notification from './components/Notification'
 import Togglable from './components/Togglable'
+import CreateBlogForm from './components/CreateBlogForm'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
@@ -15,9 +16,6 @@ const App = () => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
-  const [title, setTitle] = useState('')
-  const [author, setAuthor] = useState('')
-  const [url, setUrl] = useState('')
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
@@ -33,12 +31,12 @@ const App = () => {
     }
   }, [])
 
-  const showError = (message) => {
-    setError(true)
+  const showNotification = (message, bool) => {
+    setError(bool)
     setNotificationMsg(message)
 
     setTimeout(() => {
-      setError(false)
+      // setError(false)
       setNotificationMsg(null)
     }, 5000)
   }
@@ -56,9 +54,9 @@ const App = () => {
     } catch {
       setError(true)
       if (username.trim() === '' || password.trim() === '') {
-        showError('username and password must not be empty')
+        showNotification('username and password must not be empty', true)
       } else {
-        showError('wrong username or password')
+        showNotification('wrong username or password', true)
       }
     }
   }
@@ -72,28 +70,14 @@ const App = () => {
     setUrl('')
   }
 
-  const handleAddBlog = async event => {
-    event.preventDefault()
-
+  const addBlog = async (blogObject) => {
     try {
-      const blogObject = {
-        title: title,
-        author: author,
-        url: url
-      }
-
       const savedBlog = await blogService.create(blogObject)
 
       setBlogs(blogs.concat(savedBlog))
-      setTitle('')
-      setAuthor('')
-      setUrl('')
-      setNotificationMsg(`a new blog ${title} by ${author} added`)
-      setTimeout(() => {
-        setNotificationMsg(null)
-      }, 5000)
+      showNotification(`a new blog ${blogObject.title} by ${blogObject.author} added`, false)
     } catch {
-      showError('failed to create blog')
+      showNotification('failed to create blog', true)
     }
   }
 
@@ -123,34 +107,7 @@ const App = () => {
       </p>
 
       <Togglable buttonLabel="create new blog">
-        <h2>create new</h2>
-        <form onSubmit={handleAddBlog}>
-          <label>
-            title:
-            <input 
-              type="text"
-              value={title}
-              onChange={({ target }) => setTitle(target.value)} 
-            />
-          </label><br />
-          <label>
-            author:
-            <input 
-              type="text"
-              value={author}
-              onChange={({ target }) => setAuthor(target.value)} 
-            />
-          </label><br />
-          <label>
-            url:
-            <input 
-              type="text"
-              value={url}
-              onChange={({ target }) => setUrl(target.value)} 
-            />
-          </label><br />
-          <button type='submit'>create</button>
-        </form>
+        <CreateBlogForm createBlog={addBlog} />
       </Togglable>
 
       {blogs.map(blog =>
