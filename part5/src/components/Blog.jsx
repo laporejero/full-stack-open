@@ -29,7 +29,7 @@ const Blog = ({ blog, updateBlog, deleteBlog }) => {
   return (
     <div style={blogStyle}>
       <div>
-        {blog.title} {blog.author} 
+        {blog.title} {blog.author}
         <button onClick={toggleView}>{ viewBlog ? 'hide' : 'view' }</button>
         <div style={{ display: viewBlog ? '' : 'none' }}>
           <span>{blog.url}</span> <br />
@@ -40,7 +40,7 @@ const Blog = ({ blog, updateBlog, deleteBlog }) => {
         </div>
       </div>
     </div>
-  )  
+  )
 }
 
 export default Blog

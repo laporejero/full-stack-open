@@ -20,7 +20,7 @@ const App = () => {
   useEffect(() => {
     blogService.getAll().then(blogs =>
       setBlogs( blogs )
-    )  
+    )
   }, [])
 
   useEffect(() => {
@@ -45,7 +45,7 @@ const App = () => {
     event.preventDefault()
     try {
       const user = await loginService.login({ username, password })
-      
+
       window.localStorage.setItem('loggedBlogListUser', JSON.stringify(user))
       blogService.setToken(user.token)
       setUser(user)
@@ -65,9 +65,6 @@ const App = () => {
     event.preventDefault()
     window.localStorage.removeItem('loggedBlogListUser')
     setUser(null)
-    setTitle('')
-    setAuthor('')
-    setUrl('')
   }
 
   const addBlog = async (blogObject) => {
@@ -86,7 +83,7 @@ const App = () => {
       const updatedBlog = await blogService.update(blogObject.id, blogObject)
 
       setBlogs(prevBlogs =>
-        prevBlogs.map(blog => 
+        prevBlogs.map(blog =>
           blog.id === updatedBlog.id
             ? updatedBlog
             : blog
@@ -123,7 +120,7 @@ const App = () => {
       <div>
         <h2>Log in to application</h2>
         <Notification message={notificationMsg} error={error} />
-        <LoginForm 
+        <LoginForm
           handleLogin={handleLogin}
           username={username}
           setUsername={setUsername}
@@ -141,7 +138,7 @@ const App = () => {
       <h2>blogs</h2>
       <Notification message={notificationMsg} error={error} />
       <p>
-        {user.name} logged in 
+        {user.name} logged in
         <button onClick={handleLogout}>logout</button>
       </p>
 
@@ -150,11 +147,11 @@ const App = () => {
       </Togglable>
 
       {sortedBlogsByLikes.map(blog =>
-        <Blog 
-          key={blog.id} 
-          blog={blog} 
-          updateBlog={updateBlog} 
-          deleteBlog={deleteBlog} 
+        <Blog
+          key={blog.id}
+          blog={blog}
+          updateBlog={updateBlog}
+          deleteBlog={deleteBlog}
         />
       )}
     </div>
