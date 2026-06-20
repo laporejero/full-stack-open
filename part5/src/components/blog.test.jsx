@@ -2,17 +2,17 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import Blog from './Blog'
 
-test("renders blog's title and author", () => {
-    const blog = {
-        title: 'Testing React apps',
-        author: 'fullstackopen',
-        url: 'https://example.com',
-        likes: 10,
-        user: {
-            name: 'Admin'
-        }
+const blog = {
+    title: 'Testing React apps',
+    author: 'fullstackopen',
+    url: 'https://example.com',
+    likes: 10,
+    user: {
+        name: 'Admin'
     }
+}
 
+test("renders blog's title and author", () => {
     const { container } = render(<Blog blog={blog} />)
 
     const div = container.querySelector('.blog')
@@ -26,16 +26,6 @@ test("renders blog's title and author", () => {
 })
 
 test('url and likes are shown when button is clicked', async () => {
-    const blog = {
-        title: 'Testing React apps',
-        author: 'fullstackopen',
-        url: 'https://example.com',
-        likes: 10,
-        user: {
-            name: 'Admin'
-        }
-    }
-
     render(<Blog blog={blog} />)
 
     const user = userEvent.setup()
@@ -46,4 +36,22 @@ test('url and likes are shown when button is clicked', async () => {
     const likes = screen.getByText('10')
     expect(url).toBeVisible()
     expect(likes).toBeVisible()
+})
+
+test('props is called twice if the like button is clicked twice', async () => {
+    const mockHandler = vi.fn()
+
+    render(<Blog blog={blog} updateBlog={mockHandler} />)
+
+    const user = userEvent.setup()
+
+    const view = screen.getByText('view')
+    await user.click(view)
+
+    const button = screen.getByText('like')
+
+    await user.click(button)
+    await user.click(button)
+
+    expect(mockHandler.mock.calls).toHaveLength(2)
 })
