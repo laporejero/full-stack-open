@@ -41,32 +41,74 @@ describe('blog app', () => {
         })
 
         test('a new blog can be created', async ({ page }) => {
+            await page.getByRole('button', { name: 'create new blog' }).click()
             await createBlog(
                 page, 
-                'Building Accessible Web Components', 
-                'Rachel Green',
-                'https://a11yweb.dev'
+                'A Blog Created by Playwright', 
+                'Lionel Messi',
+                'https://blog.test'
             )
 
-            await expect(page.getByText('a new blog Building Accessible Web Components by Rachel Green added')).toBeVisible()
-            await expect(page.getByText('Building Accessible Web Components Rachel Green')).toBeVisible()
+            await expect(page.getByText('a new blog A Blog Created by Playwright by Lionel Messi added')).toBeVisible()
+            await expect(page.getByText('A Blog Created by Playwright Lionel Messi')).toBeVisible()
             await expect(page.getByRole('button', { name: 'view' })).toBeVisible()
         })
 
         test('a blog can be liked', async ({ page }) => {
+            await page.getByRole('button', { name: 'create new blog' }).click()
             await createBlog(
                 page, 
-                'Building Accessible Web Components', 
-                'Rachel Green',
-                'https://blog.dev'
+                'A Blog Created by Playwright', 
+                'Lionel Messi',
+                'https://blog.test'
             )
 
-            const blog = page.getByText('Building Accessible Web Components').locator('..')
+            const blog = page.getByText('A Blog Created by Playwright').locator('..')
             await blog.getByRole('button', { name: 'view' }).click()
             await expect(blog.getByText('0')).toBeVisible()
             await blog.getByRole('button', { name: 'like' }).click()
             await page.pause()
             await expect(blog.getByText('1')).toBeVisible()
+        })
+
+        describe('several blogs exists', () => {
+            beforeEach(async ({ page }) => {
+                await page.getByRole('button', { name: 'create new blog' }).click()
+                await createBlog(
+                    page, 
+                    'first blog', 
+                    'fullstackopen',
+                    'https://blog.test/first'
+                )
+                await createBlog(
+                    page, 
+                    'second blog', 
+                    'fullstackopen',
+                    'https://blog.test/second'
+                )
+                await createBlog(
+                    page, 
+                    'third blog', 
+                    'fullstackopen',
+                    'https://blog.test/third'
+                )
+            })
+
+            test('a blog can be deleted by the user who added it', async({ page }) => {
+                await page.pause()
+                const blog = page.locator('.blog').filter({
+                    hasText: 'third blog fullstackopen'
+                })
+                await blog.getByRole('button', { name: 'view' }).click()
+
+                page.once('dialog', dialog => {
+                    dialog.accept()
+                })
+
+                await blog.getByRole('button', { name: 'remove' }).click()
+
+                await expect(page.getByText('third blog fullstackopen')).not.toBeVisible()
+            })
         })
     })
 })
