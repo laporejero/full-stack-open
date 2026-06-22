@@ -111,4 +111,43 @@ describe('blog app', () => {
             })
         })
     })
+
+    describe('when a blog has been created by one user', () => {
+        beforeEach(async ({ page, request }) => {
+            await request.post('http://localhost:3003/api/users', {
+                data: {
+                    name: 'User 1',
+                    username: 'user1',
+                    password: 'test1'
+                }
+            })
+            await request.post('http://localhost:3003/api/users', {
+                data: {
+                    name: 'User 2',
+                    username: 'user2',
+                    password: 'test2'
+                }
+            })
+            await loginWith(page, 'user1', 'test1')
+            await page.getByRole('button', { name: 'create new blog' }).click()
+            await createBlog(
+                page, 
+                'Blog created by User 1', 
+                'User 1',
+                'https://blog.test/blog-1'
+            )
+        })
+
+        test('only the creator sees the delete button', async ({ page }) => {
+            await page.pause()
+            await expect(page.getByText('Blog created by User 1 User 1')).toBeVisible()
+            await page.getByRole('button', { name: 'view' }).click()
+            await expect(page.getByRole('button', { name: 'remove' })).toBeVisible()
+
+            await page.getByRole('button', { name: 'logout' }).click()
+            await loginWith(page, 'user2', 'test2')
+            await page.getByRole('button', { name: 'view' }).click()
+            await expect(page.getByRole('button', { name: 'remove' })).not.toBeVisible()
+        })
+    })
 })
