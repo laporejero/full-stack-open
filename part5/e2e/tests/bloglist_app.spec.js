@@ -150,4 +150,62 @@ describe('blog app', () => {
             await expect(page.getByRole('button', { name: 'remove' })).not.toBeVisible()
         })
     })
+
+    describe('several blogs with likes added', () => {
+        beforeEach(async ({ page, request }) => {
+            const loginResponse = await request.post('http://localhost:3003/api/login', {
+                data: {
+                    username: 'user',
+                    password: 'test'
+                }
+            })
+
+            const loginData = await loginResponse.json()
+            const token = loginData.token
+
+            await request.post('http://localhost:3003/api/blogs', {
+                data: {
+                    title: 'first blog',
+                    author: 'fullstackopen',
+                    url: 'https://blog.test/first',
+                    likes: 5
+                },
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+            await request.post('http://localhost:3003/api/blogs', {
+                data: {
+                    title: 'second blog',
+                    author: 'fullstackopen',
+                    url: 'https://blog.test/second',
+                    likes: 15
+                },
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+            await request.post('http://localhost:3003/api/blogs', {
+                data: {
+                    title: 'third blog',
+                    author: 'fullstackopen',
+                    url: 'https://blog.test/third',
+                    likes: 10
+                },
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+
+            await page.goto('http://localhost:5173')
+            await loginWith(page, 'user', 'test')
+        })
+
+        test('blogs are arranged in order according to the likes', async ({ page }) => {
+            const blogs = page.locator('.blog')
+            await expect(blogs.nth(0)).toContainText('second blog')
+            await expect(blogs.nth(1)).toContainText('third blog')
+            await expect(blogs.nth(2)).toContainText('first blog')
+        })
+    })
 })
