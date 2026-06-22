@@ -52,5 +52,21 @@ describe('blog app', () => {
             await expect(page.getByText('Building Accessible Web Components Rachel Green')).toBeVisible()
             await expect(page.getByRole('button', { name: 'view' })).toBeVisible()
         })
+
+        test('a blog can be liked', async ({ page }) => {
+            await createBlog(
+                page, 
+                'Building Accessible Web Components', 
+                'Rachel Green',
+                'https://blog.dev'
+            )
+
+            const blog = page.getByText('Building Accessible Web Components').locator('..')
+            await blog.getByRole('button', { name: 'view' }).click()
+            await expect(blog.getByText('0')).toBeVisible()
+            await blog.getByRole('button', { name: 'like' }).click()
+            await page.pause()
+            await expect(blog.getByText('1')).toBeVisible()
+        })
     })
 })
