@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 
-const Blog = ({ blogs, user, updateBlog, deleteBlog }) => {
+const Blog = ({ blog, user, updateBlog, deleteBlog }) => {
   const id = useParams().id
-  const blog = blogs.find(b => b.id === id)
+  const navigate = useNavigate()
 
   const [viewBlog, setViewBlog] = useState(false)
 
@@ -20,6 +20,7 @@ const Blog = ({ blogs, user, updateBlog, deleteBlog }) => {
 
   const handeDelete = () => {
     deleteBlog(blog)
+    navigate('/')
   }
 
   const blogStyle = {
@@ -40,7 +41,9 @@ const Blog = ({ blogs, user, updateBlog, deleteBlog }) => {
       </span> <br />
       <span>Added by {blog.user.name}</span>
       <br />
-      { user !== null && <button onClick={handeDelete}>remove</button>}
+      { (user !== null && user.username === blog.user.username) && 
+        <button onClick={handeDelete}>remove</button>
+      }
 
 
       {/* <button onClick={toggleView}>{ viewBlog ? 'hide' : 'view' }</button> */}

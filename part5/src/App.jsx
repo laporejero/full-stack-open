@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Routes, Route, Link, useNavigate } from 'react-router-dom'
+import { Routes, Route, Link, useNavigate, useMatch } from 'react-router-dom'
 // services
 import blogService from './services/blogs'
 import loginService from './services/login'
@@ -78,6 +78,7 @@ const App = () => {
       const savedBlog = await blogService.create(blogObject)
 
       setBlogs(blogs.concat(savedBlog))
+      navigate('/')
       showNotification(`a new blog ${blogObject.title} by ${blogObject.author} added`, false)
     } catch {
       showNotification('failed to create blog', true)
@@ -123,12 +124,16 @@ const App = () => {
 
   const padding = { padding: 5 }
 
+  const match = useMatch('/blogs/:id')
+  const blog = match ? blogs.find(blog => blog.id === match.params.id) : null
+
   const sortedBlogsByLikes = blogs.sort((a, b) => b.likes - a.likes)
 
   return (
     <div>
       <div>
         <Link style={padding} to="/">blogs</Link>
+        <Link style={padding} to="/create">new blog</Link>
         {!user 
           ? <Link style={padding} to="/login">login</Link>
           : <button onClick={handleLogout}>logout</button>
@@ -138,7 +143,7 @@ const App = () => {
       <Routes>
         <Route path='/blogs/:id' element={
           <Blog
-            blogs={blogs}
+            blog={blog}
             user={user}
             updateBlog={updateBlog}
             deleteBlog={deleteBlog}
@@ -156,6 +161,11 @@ const App = () => {
             deleteBlog={deleteBlog}
           />
         } />
+
+        <Route path="/create" element={
+          <CreateBlogForm createBlog={addBlog} />
+        } />
+
         {!user &&
           <Route path="/login" element={
             <LoginForm

@@ -25,12 +25,6 @@ const BlogList = ({
                 <button onClick={handleLogout}>logout</button>
             </p> */}
 
-            { user !== null &&
-                <Togglable buttonLabel="create new blog">
-                    <CreateBlogForm createBlog={addBlog} />
-                </Togglable>
-            }
-
             <ul>
                 {blogs.map(blog =>
                     <li key={blog.id}>
