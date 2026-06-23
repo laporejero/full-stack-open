@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom"
 import Blog from "./Blog"
 import Togglable from "./Togglable"
 import Notification from "./Notification"
@@ -30,15 +31,13 @@ const BlogList = ({
                 </Togglable>
             }
 
-            {blogs.map(blog =>
-                <Blog
-                    key={blog.id}
-                    blog={blog}
-                    user={user}
-                    updateBlog={updateBlog}
-                    deleteBlog={deleteBlog}
-                />
-            )}
+            <ul>
+                {blogs.map(blog =>
+                    <li key={blog.id}>
+                        <Link to={`/blogs/${blog.id}`}>{`${blog.title} by ${blog.author}`}</Link>
+                    </li>
+                )}
+            </ul>
         </div>
     )
 }

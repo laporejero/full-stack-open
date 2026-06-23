@@ -136,6 +136,14 @@ const App = () => {
       </div>
 
       <Routes>
+        <Route path='/blogs/:id' element={
+          <Blog
+            blogs={blogs}
+            user={user}
+            updateBlog={updateBlog}
+            deleteBlog={deleteBlog}
+          />
+        } />
         <Route path="/" element={
           <BlogList 
             blogs={sortedBlogsByLikes}
