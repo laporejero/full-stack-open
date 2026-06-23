@@ -25,7 +25,7 @@ const BlogList = ({
                 <button onClick={handleLogout}>logout</button>
             </p> */}
 
-            <ul>
+            <ul className="blog-list">
                 {blogs.map(blog =>
                     <li key={blog.id}>
                         <Link to={`/blogs/${blog.id}`}>{`${blog.title} by ${blog.author}`}</Link>
