@@ -36,10 +36,14 @@ const Blog = ({ blog, user, updateBlog, deleteBlog }) => {
           style={{ display: viewBlog ? '' : 'none' }}
         >
           <span>{blog.url}</span> <br />
-          <span>{blog.likes} <button onClick={handleLike}>like</button></span> <br />
+          <span>
+            {blog.likes} 
+            <button onClick={handleLike}>like</button>
+          </span> <br />
           <span>{blog.user.name}</span>
           <br />
-          { user.username === blog.user.username && <button onClick={handeDelete}>remove</button> }
+          { user !== null && <button onClick={handeDelete}>remove</button>}
+          {/* { user.username === blog.user.username && <button onClick={handeDelete}>remove</button> } */}
         </div>
       </div>
     </div>
