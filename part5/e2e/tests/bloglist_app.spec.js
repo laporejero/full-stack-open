@@ -16,8 +16,8 @@ describe('blog app', () => {
     })
 
     test('Login form is shown', async ({ page }) => {
-        const locator = page.getByText('Log in to application')
-        await expect(locator).toBeVisible()
+        await expect(page.getByText('login')).toBeVisible()
+        await page.getByRole('link', { name: 'login' }).click()
         await expect(page.getByLabel('username')).toBeVisible()
         await expect(page.getByLabel('password')).toBeVisible()
         await expect(page.getByRole('button', { name: 'login' })).toBeVisible()
@@ -26,7 +26,7 @@ describe('blog app', () => {
     describe('Login', () => {
         test('succeeds with correct credentials', async ({ page }) => {
             await loginWith(page, 'user', 'test')
-            await expect(page.getByText('Test User logged in')).toBeVisible()
+            await expect(page.getByRole('button', { name: 'logout' })).toBeVisible()
         })
 
         test('fails with wrong credentials', async ({ page }) => {
@@ -40,22 +40,20 @@ describe('blog app', () => {
             await loginWith(page, 'user', 'test')
         })
 
-        test('a new blog can be created', async ({ page }) => {
-            await page.getByRole('button', { name: 'create new blog' }).click()
+        test('A logged-in user can create a blog', async ({ page }) => {
             await createBlog(
                 page, 
                 'A Blog Created by Playwright', 
                 'Lionel Messi',
                 'https://blog.test'
             )
-
+            await page.pause()
             await expect(page.getByText('a new blog A Blog Created by Playwright by Lionel Messi added')).toBeVisible()
-            await expect(page.getByText('A Blog Created by Playwright Lionel Messi')).toBeVisible()
-            await expect(page.getByRole('button', { name: 'view' })).toBeVisible()
+            await page.pause()
+            await expect(page.getByRole('link', { name: 'A Blog Created by Playwright by Lionel Messi' })).toBeVisible()
         })
 
         test('a blog can be liked', async ({ page }) => {
-            await page.getByRole('button', { name: 'create new blog' }).click()
             await createBlog(
                 page, 
                 'A Blog Created by Playwright', 
@@ -63,52 +61,34 @@ describe('blog app', () => {
                 'https://blog.test'
             )
 
-            const blog = page.getByText('A Blog Created by Playwright').locator('..')
-            await blog.getByRole('button', { name: 'view' }).click()
-            await expect(blog.getByText('0')).toBeVisible()
-            await blog.getByRole('button', { name: 'like' }).click()
             await page.pause()
-            await expect(blog.getByText('1')).toBeVisible()
+            await expect(page.getByRole('link', { name: 'A Blog Created by Playwright by Lionel Messi' })).toBeVisible()
+            await page.getByRole('link', { name: 'A Blog Created by Playwright by Lionel Messi' }).click()
+            await expect(page.getByText('likes 0')).toBeVisible()
+            await page.getByRole('button', { name: 'like' }).click()
+            await page.pause()
+            await expect(page.getByText('likes 1')).toBeVisible()
         })
 
-        describe('several blogs exists', () => {
-            beforeEach(async ({ page }) => {
-                await page.getByRole('button', { name: 'create new blog' }).click()
-                await createBlog(
-                    page, 
-                    'first blog', 
-                    'fullstackopen',
-                    'https://blog.test/first'
-                )
-                await createBlog(
-                    page, 
-                    'second blog', 
-                    'fullstackopen',
-                    'https://blog.test/second'
-                )
-                await createBlog(
-                    page, 
-                    'third blog', 
-                    'fullstackopen',
-                    'https://blog.test/third'
-                )
+        test.only('A logged-in user can delete a blog', async ({ page }) => {
+            await createBlog(
+                page, 
+                'A Blog Created by Playwright', 
+                'Lionel Messi',
+                'https://blog.test'
+            )
+
+            await page.pause()
+            await expect(page.getByRole('link', { name: 'A Blog Created by Playwright by Lionel Messi' })).toBeVisible()
+            await page.getByRole('link', { name: 'A Blog Created by Playwright by Lionel Messi' }).click()
+
+            page.once('dialog', dialog => {
+                dialog.accept()
             })
 
-            test('a blog can be deleted by the user who added it', async({ page }) => {
-                await page.pause()
-                const blog = page.locator('.blog').filter({
-                    hasText: 'third blog fullstackopen'
-                })
-                await blog.getByRole('button', { name: 'view' }).click()
-
-                page.once('dialog', dialog => {
-                    dialog.accept()
-                })
-
-                await blog.getByRole('button', { name: 'remove' }).click()
-
-                await expect(page.getByText('third blog fullstackopen')).not.toBeVisible()
-            })
+            await page.getByRole('button', { name: 'remove' }).click()
+            await page.pause()
+            await expect(page.getByText('third blog by fullstackopen')).not.toBeVisible()
         })
     })
 
@@ -129,24 +109,23 @@ describe('blog app', () => {
                 }
             })
             await loginWith(page, 'user1', 'test1')
-            await page.getByRole('button', { name: 'create new blog' }).click()
             await createBlog(
                 page, 
-                'Blog created by User 1', 
-                'User 1',
+                'New Blog', 
+                'Blogger',
                 'https://blog.test/blog-1'
             )
         })
 
         test('only the creator sees the delete button', async ({ page }) => {
             await page.pause()
-            await expect(page.getByText('Blog created by User 1 User 1')).toBeVisible()
-            await page.getByRole('button', { name: 'view' }).click()
+            await expect(page.getByRole('link', { name: 'New Blog by Blogger' })).toBeVisible()
+            await page.getByRole('link', { name: 'New Blog by Blogger' }).click()
             await expect(page.getByRole('button', { name: 'remove' })).toBeVisible()
 
             await page.getByRole('button', { name: 'logout' }).click()
             await loginWith(page, 'user2', 'test2')
-            await page.getByRole('button', { name: 'view' }).click()
+            await page.getByRole('link', { name: 'New Blog by Blogger' }).click()
             await expect(page.getByRole('button', { name: 'remove' })).not.toBeVisible()
         })
     })
@@ -198,14 +177,13 @@ describe('blog app', () => {
             })
 
             await page.goto('http://localhost:5173')
-            await loginWith(page, 'user', 'test')
         })
 
         test('blogs are arranged in order according to the likes', async ({ page }) => {
-            const blogs = page.locator('.blog')
-            await expect(blogs.nth(0)).toContainText('second blog')
-            await expect(blogs.nth(1)).toContainText('third blog')
-            await expect(blogs.nth(2)).toContainText('first blog')
+            const blogs = page.locator('li')
+            await expect(blogs.nth(0)).toContainText('second blog by fullstackopen')
+            await expect(blogs.nth(1)).toContainText('third blog by fullstackopen')
+            await expect(blogs.nth(2)).toContainText('first blog by fullstackopen')
         })
     })
 })
