@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Routes, Route, Link, useNavigate, useMatch } from 'react-router-dom'
+import { Container } from '@mui/material'
 // services
 import blogService from './services/blogs'
 import loginService from './services/login'
@@ -130,7 +131,7 @@ const App = () => {
   const sortedBlogsByLikes = blogs.sort((a, b) => b.likes - a.likes)
 
   return (
-    <div>
+    <Container>
       <div>
         <Link style={padding} to="/">blogs</Link>
         <Link style={padding} to="/create">new blog</Link>
@@ -180,7 +181,7 @@ const App = () => {
           } />
         }
       </Routes>
-    </div>
+    </Container>
   )
 }
 
