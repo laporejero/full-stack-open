@@ -14,8 +14,7 @@ import BlogList from './components/BlogList'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
-  const [error, setError] = useState(false)
-  const [notificationMsg, setNotificationMsg] = useState(null)
+  const [notification, setNotification] = useState(null)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
@@ -36,16 +35,6 @@ const App = () => {
     }
   }, [])
 
-  const showNotification = (message, bool) => {
-    setError(bool)
-    setNotificationMsg(message)
-
-    setTimeout(() => {
-      // setError(false)
-      setNotificationMsg(null)
-    }, 5000)
-  }
-
   const handleLogin = async event => {
     event.preventDefault()
     try {
@@ -58,12 +47,14 @@ const App = () => {
       setPassword('')
       navigate('/')
     } catch {
-      setError(true)
       if (username.trim() === '' || password.trim() === '') {
-        showNotification('username and password must not be empty', true)
+        setNotification({ text: 'username and password must not be empty', type: 'error'})
       } else {
-        showNotification('wrong username or password', true)
+        setNotification({ text: 'wrong username or password', type: 'error'})
       }
+      setTimeout(() => {
+        setNotification(null)
+      }, 5000)
     }
   }
 
@@ -75,14 +66,21 @@ const App = () => {
   }
 
   const addBlog = async (blogObject) => {
+    console.log('addBlog data:', blogObject)
     try {
       const savedBlog = await blogService.create(blogObject)
 
       setBlogs(blogs.concat(savedBlog))
       navigate('/')
-      showNotification(`a new blog ${blogObject.title} by ${blogObject.author} added`, false)
+      setNotification({ text: `a new blog ${blogObject.title} by ${blogObject.author} added!`, type: 'success' })
+      setTimeout(() => {
+        setNotification(null)
+      }, 5000)
     } catch {
-      showNotification('failed to create blog', true)
+      setNotification({ text: 'failed to create blog', type: 'error'})
+      setTimeout(() => {
+        setNotification(null)
+      }, 5000)
     }
   }
 
@@ -97,7 +95,10 @@ const App = () => {
             : blog
         ))
     } catch {
-      showNotification('failed to update blog', true)
+      setNotification({ text: 'failed to update blog', type: 'error'})
+      setTimeout(() => {
+        setNotification(null)
+      }, 5000)
     }
   }
 
@@ -119,7 +120,10 @@ const App = () => {
       } else {
         errorMsg = 'failed to delete blog'
       }
-      showNotification(errorMsg, true)
+      setNotification({ text: errorMsg, type: 'error' })
+      setTimeout(() => {
+        setNotification(null)
+      }, 5000)
     }
   }
 
@@ -141,6 +145,8 @@ const App = () => {
         }
       </div>
 
+      <Notification notification={notification} />
+
       <Routes>
         <Route path='/blogs/:id' element={
           <Blog
@@ -155,8 +161,6 @@ const App = () => {
             blogs={sortedBlogsByLikes}
             user={user}
             handleLogout={handleLogout}
-            notificationMsg={notificationMsg}
-            error={error}
             addBlog={addBlog}
             updateBlog={updateBlog}
             deleteBlog={deleteBlog}
@@ -164,7 +168,7 @@ const App = () => {
         } />
 
         <Route path="/create" element={
-          <CreateBlogForm createBlog={addBlog} />
+          <CreateBlogForm createBlog={addBlog} notification={notification} />
         } />
 
         {!user &&
@@ -175,8 +179,7 @@ const App = () => {
               setUsername={setUsername}
               password={password}
               setPassword={setPassword}
-              message={notificationMsg}
-              error={error}
+              notification={notification}
             />
           } />
         }

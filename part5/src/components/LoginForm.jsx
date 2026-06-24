@@ -7,13 +7,11 @@ const LoginForm = ({
   setUsername,
   password,
   setPassword,
-  message,
-  error
+  notification
 }) => {
   return (
     <div>
       <h2>Log in to application</h2>
-      <Notification message={message} error={error} />
       <form onSubmit={handleLogin}>
         <TextField 
           label="username"
