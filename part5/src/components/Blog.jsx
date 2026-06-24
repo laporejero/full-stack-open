@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { Card, CardContent, Typography, Link, Button, Stack } from '@mui/material'
 
 const Blog = ({ blog, user, updateBlog, deleteBlog }) => {
   const id = useParams().id
@@ -32,28 +33,41 @@ const Blog = ({ blog, user, updateBlog, deleteBlog }) => {
   }
 
   return (
-    <div className='blog'>
-      <h2>{blog.author}: {blog.title}</h2>
-      <a href={blog.url}>{blog.url}</a> <br />
-      <span>
-        likes {blog.likes} 
-        { user !== null && <button onClick={handleLike}>like</button>}
-      </span> <br />
-      <span>Added by {blog.user.name}</span>
-      <br />
-      { (user !== null && user.username === blog.user.username) && 
-        <button onClick={handeDelete}>remove</button>
-      }
+    <Card sx={{ mb: 2 }}>
+      <CardContent>
+        <Typography variant="h5">
+          {blog.title}
+        </Typography>
 
+        <Typography sx={{ mt: 1 }}>
+          by {blog.author} 
+        </Typography>
 
-      {/* <button onClick={toggleView}>{ viewBlog ? 'hide' : 'view' }</button> */}
-      {/* <div 
-        className='blog-details'
-        style={{ display: viewBlog ? '' : 'none' }}
-      >
-        { user.username === blog.user.username && <button onClick={handeDelete}>remove</button> }
-      </div> */}
-    </div>
+        <Link href={blog.url} target="_blank" rel="noopener noreferrer" >
+          <Typography sx={{ mt: 1 }}>{blog.url}</Typography>
+        </Link>
+
+        <Typography sx={{ mt: 1 }}>
+          Added by {blog.user.name}
+        </Typography>
+
+        <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1 }} >
+          <Typography>
+            {blog.likes} likes
+          </Typography>
+
+          { user !== null && (
+            <Button size="small" variant="outlined" onClick={handleLike} >like</Button>
+          )}
+
+          { user !== null && 
+            user.username === blog.user.username && (
+              <Button color="error" variant="outlined" size="small" onClick={handeDelete}>remove</Button>
+            )
+          }
+        </Stack>
+      </CardContent>
+    </Card>
   )
 }
 

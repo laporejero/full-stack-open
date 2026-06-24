@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { Routes, Route, Link, useNavigate, useMatch } from 'react-router-dom'
-import { Container } from '@mui/material'
 // services
 import blogService from './services/blogs'
 import loginService from './services/login'
@@ -11,6 +10,8 @@ import Notification from './components/Notification'
 import Togglable from './components/Togglable'
 import CreateBlogForm from './components/CreateBlogForm'
 import BlogList from './components/BlogList'
+// style
+import { Container, AppBar, Toolbar, Button, Typography } from '@mui/material'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
@@ -136,14 +137,19 @@ const App = () => {
 
   return (
     <Container>
-      <div>
-        <Link style={padding} to="/">blogs</Link>
-        <Link style={padding} to="/create">new blog</Link>
-        {!user 
-          ? <Link style={padding} to="/login">login</Link>
-          : <button onClick={handleLogout}>logout</button>
-        }
-      </div>
+      <AppBar position="static">
+        <Toolbar>
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+            Blog App
+          </Typography>
+          <Button color="inherit" component={Link} to="/">blogs</Button>
+          <Button color="inherit" component={Link} to="/create">new blog</Button>
+          {!user 
+            ? <Button color="inherit" component={Link} to="/login">login</Button>
+            : <Button color="inherit" onClick={handleLogout}>logout</Button>
+          }
+        </Toolbar>
+      </AppBar>
 
       <Notification notification={notification} />
 
