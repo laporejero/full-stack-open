@@ -2,7 +2,7 @@ import { useAnecdotes, useAnecdoteActions, useNotificationAction } from "../stor
 
 const AnecdoteList = () => {
     const anecdotes = useAnecdotes()
-    const { vote } = useAnecdoteActions()
+    const { vote, remove } = useAnecdoteActions()
     const setNotification = useNotificationAction()
 
     const handleVote = (anecdote) => {
@@ -28,6 +28,9 @@ const AnecdoteList = () => {
                     >
                         vote
                     </button>
+                    {anecdote.votes === 0 && 
+                        <button onClick={() => remove(anecdote.id)}>delete</button>
+                    }
                 </div>
                 </div>
             ))}
