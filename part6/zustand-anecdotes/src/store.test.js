@@ -12,6 +12,7 @@ vi.mock('./services/anecdotes', () => ({
 
 import anecdoteService from './services/anecdotes'
 import useAnecdoteStore, { useAnecdotes, useAnecdoteActions } from './store'
+import anecdotes from './services/anecdotes'
 
 beforeEach(() => {
     useAnecdoteStore.setState({ anecdotes: [], filter: '' })
@@ -53,5 +54,27 @@ describe('useAnecdoteActions', () => {
             { id: 3, content: 'third', votes: 5 },
             { id: 1, content: 'first', votes: 2 },
         ])
+    })
+
+    it('renders anecdotes matching the filter ', async () => {
+        const mockAnecdotes = [
+            { id: 1, content: 'first', votes: 2 },
+            { id: 2, content: 'second', votes: 8 },
+            { id: 3, content: 'third', votes: 5 },
+        ]
+        anecdoteService.getAll.mockResolvedValue(mockAnecdotes)
+
+        const { result } = renderHook(() => useAnecdoteActions())
+
+        await act(async () => {
+            await result.current.initialize()
+        })
+
+        act(() => {
+            useAnecdoteStore.setState({ filter: 'third' })
+        })
+
+        const { result: anecdotesResult } = renderHook(() => useAnecdotes())
+        expect(anecdotesResult.current).toEqual([{ id: 3, content: 'third', votes: 5 }])
     })
 })
