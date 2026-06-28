@@ -1,21 +1,25 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { getAnecdotes, createAnecdote } from './requests'
 import AnecdoteForm from './components/AnecdoteForm'
 import Notification from './components/Notification'
 
 const App = () => {
+  const queryClient = useQueryClient()
+
+  const newAnecdoteMutation = useMutation({
+    mutationFn: createAnecdote,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['anecdotes'] })
+    },
+  })
+
   const handleVote = (anecdote) => {
     console.log('vote')
   }
 
   const result = useQuery({
     queryKey: ['anecdotes'],
-    queryFn: async () => {
-      const response = await fetch('http://localhost:3001/anecdotes')
-      if (!response.ok) {
-        throw new Error('Failed to fetch notes')
-      }
-      return await response.json()
-    },
+    queryFn: getAnecdotes,
     retry: false
   })
 
@@ -36,7 +40,7 @@ const App = () => {
       <h3>Anecdote app</h3>
 
       <Notification />
-      <AnecdoteForm />
+      <AnecdoteForm newAnecdote={newAnecdoteMutation.mutate} />
 
       {anecdotes.map((anecdote) => (
         <div key={anecdote.id}>
