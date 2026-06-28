@@ -1,12 +1,9 @@
-const AnecdoteForm = ({ newAnecdote }) => {
+const AnecdoteForm = ({ addAnecdote }) => {
   const onCreate = (event) => {
     event.preventDefault()
     const content = event.target.anecdote.value
     event.target.reset()
-    newAnecdote({
-      content: content,
-      votes: 0
-    })
+    addAnecdote(content)
   }
 
   return (
