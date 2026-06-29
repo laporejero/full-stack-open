@@ -1,9 +1,14 @@
-const AnecdoteForm = ({ addAnecdote }) => {
+const AnecdoteForm = ({ addAnecdote, setNotification }) => {
   const onCreate = (event) => {
     event.preventDefault()
     const content = event.target.anecdote.value
     event.target.reset()
     addAnecdote(content)
+
+    setNotification(`anecdote '${content}' is added`)
+    setTimeout(() => {
+      setNotification(null)
+    }, 5000)
   }
 
   return (
