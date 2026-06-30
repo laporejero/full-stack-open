@@ -29,5 +29,9 @@ export const useAnecdotes = () => {
     anecdoteService.getAll().then(data => setAnecdotes(data))
   }, [])
 
-  return {anecdotes, setAnecdotes}
+  const addAnecdote = (anecdote) => {
+    setAnecdotes(anecdotes.concat({ ...anecdote, id: Math.round(Math.random() * 10000) }))
+  }
+
+  return {anecdotes, addAnecdote}
 }
