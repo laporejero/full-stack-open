@@ -1,5 +1,13 @@
 import { useState, useEffect } from 'react'
 import anecdoteService from '../services/anecdotes'
+import { useContext } from 'react'
+import { AnecdoteContext } from '../contexts/AnecdoteContext'
+
+export const useAnecdotes = () => {
+  const { anecdotes, addAnecdote, deleteAnecdote } = useContext(AnecdoteContext)
+
+  return { anecdotes, addAnecdote, deleteAnecdote }
+}
 
 export const useField = (type) => {
   const [value, setValue] = useState('')
@@ -18,20 +26,4 @@ export const useField = (type) => {
     onChange,
     reset
   }
-}
-
-// modules can have several named exports
-
-export const useAnecdotes = () => {
-  const [anecdotes, setAnecdotes] = useState([])
-  
-  useEffect(() => {
-    anecdoteService.getAll().then(data => setAnecdotes(data))
-  }, [])
-
-  const addAnecdote = (anecdote) => {
-    setAnecdotes(anecdotes.concat({ ...anecdote, id: Math.round(Math.random() * 10000) }))
-  }
-
-  return {anecdotes, addAnecdote}
 }
