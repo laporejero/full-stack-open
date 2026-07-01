@@ -10,6 +10,7 @@ import Notification from './components/Notification'
 import Togglable from './components/Togglable'
 import CreateBlogForm from './components/CreateBlogForm'
 import BlogList from './components/BlogList'
+import ErrorBoundary from './components/ErrorBoundary'
 // style
 import { Container, AppBar, Toolbar, Button, Typography } from '@mui/material'
 
@@ -152,44 +153,46 @@ const App = () => {
       </AppBar>
 
       <Notification notification={notification} />
-
-      <Routes>
-        <Route path='/blogs/:id' element={
-          <Blog
-            blog={blog}
-            user={user}
-            updateBlog={updateBlog}
-            deleteBlog={deleteBlog}
-          />
-        } />
-        <Route path="/" element={
-          <BlogList 
-            blogs={sortedBlogsByLikes}
-            user={user}
-            handleLogout={handleLogout}
-            addBlog={addBlog}
-            updateBlog={updateBlog}
-            deleteBlog={deleteBlog}
-          />
-        } />
-
-        <Route path="/create" element={
-          <CreateBlogForm createBlog={addBlog} notification={notification} />
-        } />
-
-        {!user &&
-          <Route path="/login" element={
-            <LoginForm
-              handleLogin={handleLogin}
-              username={username}
-              setUsername={setUsername}
-              password={password}
-              setPassword={setPassword}
-              notification={notification}
+      
+      <ErrorBoundary>
+        <Routes>
+          <Route path='/blogs/:id' element={
+            <Blog
+              blog={blog}
+              user={user}
+              updateBlog={updateBlog}
+              deleteBlog={deleteBlog}
             />
           } />
-        }
-      </Routes>
+          <Route path="/" element={
+            <BlogList 
+              blogs={sortedBlogsByLikes}
+              user={user}
+              handleLogout={handleLogout}
+              addBlog={addBlog}
+              updateBlog={updateBlog}
+              deleteBlog={deleteBlog}
+            />
+          } />
+
+          <Route path="/create" element={
+            <CreateBlogForm createBlog={addBlog} notification={notification} />
+          } />
+
+          {!user &&
+            <Route path="/login" element={
+              <LoginForm
+                handleLogin={handleLogin}
+                username={username}
+                setUsername={setUsername}
+                password={password}
+                setPassword={setPassword}
+                notification={notification}
+              />
+            } />
+          }
+        </Routes>
+      </ErrorBoundary>
     </Container>
   )
 }
