@@ -11,6 +11,7 @@ import Togglable from './components/Togglable'
 import CreateBlogForm from './components/CreateBlogForm'
 import BlogList from './components/BlogList'
 import ErrorBoundary from './components/ErrorBoundary'
+import NotFound from './components/NotFound'
 // style
 import { Container, AppBar, Toolbar, Button, Typography } from '@mui/material'
 
@@ -191,6 +192,8 @@ const App = () => {
               />
             } />
           }
+
+          <Route path='*' element={<NotFound></NotFound>} />
         </Routes>
       </ErrorBoundary>
     </Container>

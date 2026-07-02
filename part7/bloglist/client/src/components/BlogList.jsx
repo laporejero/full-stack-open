@@ -15,15 +15,11 @@ const BlogList = ({
     deleteBlog
 }) => {
 
-
     return (
         <div>
             <h2>blogs</h2>
+            
             <Notification message={notificationMsg} error={error} />
-            {/* <p>
-                {user.name} logged in
-                <button onClick={handleLogout}>logout</button>
-            </p> */}
 
             <ul className="blog-list">
                 {blogs.map(blog =>
