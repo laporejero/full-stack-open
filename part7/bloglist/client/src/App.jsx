@@ -33,7 +33,7 @@ const App = () => {
   const [user, setUser] = useState(null);
 
   const navigate = useNavigate();
-  
+
   const match = useMatch("/blogs/:id");
 
   useEffect(() => {
@@ -50,6 +50,25 @@ const App = () => {
       queryClient.invalidateQueries({
         queryKey: ['blogs'],
       });
+    },
+  });
+
+  const updateBlogMutation = useMutation({
+    mutationFn: ({ id, blog }) => blogService.update(id, blog),
+    onSuccess: (updatedBlog) => {
+      queryClient.setQueryData(['blogs'], (oldBlogs) =>
+        oldBlogs.map((blog) =>
+          blog.id === updatedBlog.id ? updatedBlog : blog
+        ));
+    },
+  });
+
+  const deleteBlogMutation = useMutation({
+    mutationFn: (id) => blogService.remove(id),
+    onSuccess: (_, deletedId) => {
+      queryClient.setQueryData(['blogs'], (oldBlogs) =>
+        oldBlogs.filter((blog) => blog.id !== deletedId)
+      );
     },
   });
 
@@ -111,49 +130,42 @@ const App = () => {
     }
   };
 
-  // const updateBlog = async (blogObject) => {
-  //   try {
-  //     const updatedBlog = await blogService.update(blogObject.id, blogObject);
+  const updateBlog = async (blogObject) => {
+    try {
+      await updateBlogMutation.mutateAsync({
+        id: blogObject.id, 
+        blog: blogObject
+      })
+    } catch {
+      showNotification({
+        text: "failed to update blog",
+        type: "error",
+      });
+    }
+  };
 
-  //     setBlogs((prevBlogs) =>
-  //       prevBlogs.map((blog) =>
-  //         blog.id === updatedBlog.id ? updatedBlog : blog,
-  //       ),
-  //     );
-  //   } catch {
-  //     showNotification({
-  //       text: "failed to update blog",
-  //       type: "error",
-  //     });
-  //   }
-  // };
+  const deleteBlog = async (blogObject) => {
+    const confirmed = window.confirm(
+      `Remove blog ${blogObject.title} by ${blogObject.author}`,
+    );
 
-  // const deleteBlog = async (blogObject) => {
-  //   const confirmed = window.confirm(
-  //     `Remove blog ${blogObject.title} by ${blogObject.author}`,
-  //   );
+    if (!confirmed) return;
 
-  //   if (!confirmed) return;
-
-  //   try {
-  //     await blogService.remove(blogObject.id);
-
-  //     setBlogs((prevBlogs) =>
-  //       prevBlogs.filter((blog) => blog.id !== blogObject.id),
-  //     );
-  //   } catch (error) {
-  //     let errorMsg;
-  //     if (error.response.status === 403) {
-  //       errorMsg = "you are not authorized to delete this blog";
-  //     } else {
-  //       errorMsg = "failed to delete blog";
-  //     }
-  //     showNotification({
-  //       text: errorMsg,
-  //       type: "error",
-  //     });
-  //   }
-  // };
+    try {
+      await deleteBlogMutation.mutateAsync(blogObject.id)
+    } catch (error) {
+      let errorMsg;
+      if (error.response.status === 403) {
+        errorMsg = "you are not authorized to delete this blog";
+      } else {
+        errorMsg = "failed to delete blog";
+      }
+      showNotification({
+        text: errorMsg,
+        type: "error",
+      });
+    }
+  };
 
   const padding = { padding: 5 };
 
@@ -196,6 +208,8 @@ const App = () => {
               <Blog
                 blog={blog}
                 user={user}
+                updateBlog={updateBlog}
+                deleteBlog={deleteBlog}
               />
             }
           />
@@ -204,9 +218,6 @@ const App = () => {
             element={
               <BlogList
                 blogs={sortedBlogsByLikes}
-                user={user}
-                handleLogout={handleLogout}
-                addBlog={addBlog}
               />
             }
           />

@@ -3,14 +3,7 @@ import Blog from "./Blog";
 import Togglable from "./Togglable";
 import CreateBlogForm from "./CreateBlogForm";
 
-const BlogList = ({
-  blogs,
-  user,
-  handleLogout,
-  addBlog,
-  updateBlog,
-  deleteBlog,
-}) => {
+const BlogList = ({ blogs }) => {
   return (
     <div>
       <h2>blogs</h2>
