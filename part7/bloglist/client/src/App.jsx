@@ -12,12 +12,15 @@ import CreateBlogForm from "./components/CreateBlogForm";
 import BlogList from "./components/BlogList";
 import ErrorBoundary from "./components/ErrorBoundary";
 import NotFound from "./components/NotFound";
+// hooks
+import { useNotification } from "./hooks/useNotification";
 // style
 import { Container, AppBar, Toolbar, Button, Typography } from "@mui/material";
 
 const App = () => {
+  const { showNotification } = useNotification()
+
   const [blogs, setBlogs] = useState([]);
-  const [notification, setNotification] = useState(null);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [user, setUser] = useState(null);
@@ -49,16 +52,16 @@ const App = () => {
       navigate("/");
     } catch {
       if (username.trim() === "" || password.trim() === "") {
-        setNotification({
+        showNotification({
           text: "username and password must not be empty",
           type: "error",
         });
       } else {
-        setNotification({ text: "wrong username or password", type: "error" });
+        showNotification({
+          text: "wrong username or password",
+          type: "error",
+        });
       }
-      setTimeout(() => {
-        setNotification(null);
-      }, 5000);
     }
   };
 
@@ -76,18 +79,15 @@ const App = () => {
 
       setBlogs(blogs.concat(savedBlog));
       navigate("/");
-      setNotification({
+      showNotification({
         text: `a new blog ${blogObject.title} by ${blogObject.author} added!`,
         type: "success",
-      });
-      setTimeout(() => {
-        setNotification(null);
-      }, 5000);
+      })
     } catch {
-      setNotification({ text: "failed to create blog", type: "error" });
-      setTimeout(() => {
-        setNotification(null);
-      }, 5000);
+      showNotification({
+        text: "failed to create blog",
+        type: "error",
+      });
     }
   };
 
@@ -101,10 +101,10 @@ const App = () => {
         ),
       );
     } catch {
-      setNotification({ text: "failed to update blog", type: "error" });
-      setTimeout(() => {
-        setNotification(null);
-      }, 5000);
+      showNotification({
+        text: "failed to update blog",
+        type: "error",
+      });
     }
   };
 
@@ -128,10 +128,10 @@ const App = () => {
       } else {
         errorMsg = "failed to delete blog";
       }
-      setNotification({ text: errorMsg, type: "error" });
-      setTimeout(() => {
-        setNotification(null);
-      }, 5000);
+      showNotification({
+        text: errorMsg,
+        type: "error",
+      });
     }
   };
 
@@ -167,7 +167,7 @@ const App = () => {
         </Toolbar>
       </AppBar>
 
-      <Notification notification={notification} />
+      <Notification />
 
       <ErrorBoundary>
         <Routes>
@@ -196,15 +196,7 @@ const App = () => {
             }
           />
 
-          <Route
-            path="/create"
-            element={
-              <CreateBlogForm
-                createBlog={addBlog}
-                notification={notification}
-              />
-            }
-          />
+          <Route path="/create" element={<CreateBlogForm createBlog={addBlog}/>} />
 
           {!user && (
             <Route
@@ -216,7 +208,6 @@ const App = () => {
                   setUsername={setUsername}
                   password={password}
                   setPassword={setPassword}
-                  notification={notification}
                 />
               }
             />

@@ -1,13 +1,11 @@
 import { TextField, Button } from "@mui/material";
-import Notification from "./Notification";
 
 const LoginForm = ({
   handleLogin,
   username,
   setUsername,
   password,
-  setPassword,
-  notification,
+  setPassword
 }) => {
   return (
     <div>

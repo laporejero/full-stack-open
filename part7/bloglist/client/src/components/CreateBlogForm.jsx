@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { TextField, Button } from "@mui/material";
-import Notification from "./Notification";
 
-const CreateBlogForm = ({ createBlog, notification }) => {
+const CreateBlogForm = ({ createBlog }) => {
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [url, setUrl] = useState("");

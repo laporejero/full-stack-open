@@ -52,7 +52,7 @@ const Blog = ({ blog, user, updateBlog, deleteBlog }) => {
 
         <Typography sx={{ mt: 1 }}>Added by {blog.user.name}</Typography>
 
-        <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1 }}>
+        <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
           <Typography>{blog.likes} likes</Typography>
 
           {user !== null && (
