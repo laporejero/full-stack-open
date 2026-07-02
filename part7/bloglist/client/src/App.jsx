@@ -1,3 +1,4 @@
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { Routes, Route, Link, useNavigate, useMatch } from "react-router-dom";
 // services
@@ -20,16 +21,20 @@ import { Container, AppBar, Toolbar, Button, Typography } from "@mui/material";
 const App = () => {
   const { showNotification } = useNotification()
 
-  const [blogs, setBlogs] = useState([]);
+  const queryClient = useQueryClient()
+
+  const { data: blogs = [], isPending, isError, error } = useQuery({
+    queryKey: ['blogs'],
+    queryFn: blogService.getAll,
+  })
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [user, setUser] = useState(null);
 
   const navigate = useNavigate();
-
-  useEffect(() => {
-    blogService.getAll().then((blogs) => setBlogs(blogs));
-  }, []);
+  
+  const match = useMatch("/blogs/:id");
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem("loggedBlogListUser");
@@ -38,6 +43,23 @@ const App = () => {
       setUser(user);
     }
   }, []);
+
+  const createBlogMutation = useMutation({
+    mutationFn: blogService.create,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['blogs'],
+      });
+    },
+  });
+
+  if (isPending) {
+    return <div>Loading blogs...</div>
+  }
+
+  if (isError) {
+    return <div>Error loading blogs: {error.message}</div>
+  }
 
   const handleLogin = async (event) => {
     event.preventDefault();
@@ -73,11 +95,9 @@ const App = () => {
   };
 
   const addBlog = async (blogObject) => {
-    console.log("addBlog data:", blogObject);
     try {
-      const savedBlog = await blogService.create(blogObject);
+      await createBlogMutation.mutateAsync(blogObject);
 
-      setBlogs(blogs.concat(savedBlog));
       navigate("/");
       showNotification({
         text: `a new blog ${blogObject.title} by ${blogObject.author} added!`,
@@ -91,56 +111,55 @@ const App = () => {
     }
   };
 
-  const updateBlog = async (blogObject) => {
-    try {
-      const updatedBlog = await blogService.update(blogObject.id, blogObject);
+  // const updateBlog = async (blogObject) => {
+  //   try {
+  //     const updatedBlog = await blogService.update(blogObject.id, blogObject);
 
-      setBlogs((prevBlogs) =>
-        prevBlogs.map((blog) =>
-          blog.id === updatedBlog.id ? updatedBlog : blog,
-        ),
-      );
-    } catch {
-      showNotification({
-        text: "failed to update blog",
-        type: "error",
-      });
-    }
-  };
+  //     setBlogs((prevBlogs) =>
+  //       prevBlogs.map((blog) =>
+  //         blog.id === updatedBlog.id ? updatedBlog : blog,
+  //       ),
+  //     );
+  //   } catch {
+  //     showNotification({
+  //       text: "failed to update blog",
+  //       type: "error",
+  //     });
+  //   }
+  // };
 
-  const deleteBlog = async (blogObject) => {
-    const confirmed = window.confirm(
-      `Remove blog ${blogObject.title} by ${blogObject.author}`,
-    );
+  // const deleteBlog = async (blogObject) => {
+  //   const confirmed = window.confirm(
+  //     `Remove blog ${blogObject.title} by ${blogObject.author}`,
+  //   );
 
-    if (!confirmed) return;
+  //   if (!confirmed) return;
 
-    try {
-      await blogService.remove(blogObject.id);
+  //   try {
+  //     await blogService.remove(blogObject.id);
 
-      setBlogs((prevBlogs) =>
-        prevBlogs.filter((blog) => blog.id !== blogObject.id),
-      );
-    } catch (error) {
-      let errorMsg;
-      if (error.response.status === 403) {
-        errorMsg = "you are not authorized to delete this blog";
-      } else {
-        errorMsg = "failed to delete blog";
-      }
-      showNotification({
-        text: errorMsg,
-        type: "error",
-      });
-    }
-  };
+  //     setBlogs((prevBlogs) =>
+  //       prevBlogs.filter((blog) => blog.id !== blogObject.id),
+  //     );
+  //   } catch (error) {
+  //     let errorMsg;
+  //     if (error.response.status === 403) {
+  //       errorMsg = "you are not authorized to delete this blog";
+  //     } else {
+  //       errorMsg = "failed to delete blog";
+  //     }
+  //     showNotification({
+  //       text: errorMsg,
+  //       type: "error",
+  //     });
+  //   }
+  // };
 
   const padding = { padding: 5 };
 
-  const match = useMatch("/blogs/:id");
   const blog = match ? blogs.find((blog) => blog.id === match.params.id) : null;
 
-  const sortedBlogsByLikes = blogs.sort((a, b) => b.likes - a.likes);
+  const sortedBlogsByLikes = [...blogs].sort((a, b) => b.likes - a.likes);
 
   return (
     <Container>
@@ -177,8 +196,6 @@ const App = () => {
               <Blog
                 blog={blog}
                 user={user}
-                updateBlog={updateBlog}
-                deleteBlog={deleteBlog}
               />
             }
           />
@@ -190,8 +207,6 @@ const App = () => {
                 user={user}
                 handleLogout={handleLogout}
                 addBlog={addBlog}
-                updateBlog={updateBlog}
-                deleteBlog={deleteBlog}
               />
             }
           />
