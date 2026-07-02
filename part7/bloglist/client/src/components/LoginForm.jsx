@@ -1,5 +1,5 @@
-import { TextField, Button } from "@mui/material"
-import Notification from "./Notification"
+import { TextField, Button } from "@mui/material";
+import Notification from "./Notification";
 
 const LoginForm = ({
   handleLogin,
@@ -7,13 +7,13 @@ const LoginForm = ({
   setUsername,
   password,
   setPassword,
-  notification
+  notification,
 }) => {
   return (
     <div>
       <h2>Log in to application</h2>
       <form onSubmit={handleLogin}>
-        <TextField 
+        <TextField
           label="username"
           value={username}
           onChange={({ target }) => setUsername(target.value)}
@@ -21,7 +21,7 @@ const LoginForm = ({
           variant="standard"
         />
         <br />
-        <TextField 
+        <TextField
           label="password"
           type="password"
           value={password}
@@ -31,11 +31,13 @@ const LoginForm = ({
           style={{ marginTop: 10 }}
         />
         <div>
-          <Button type="submit" variant="contained" style={{ marginTop: 10 }}>login</Button>
+          <Button type="submit" variant="contained" style={{ marginTop: 10 }}>
+            login
+          </Button>
         </div>
       </form>
     </div>
-  )
-}
+  );
+};
 
-export default LoginForm
+export default LoginForm;
