@@ -4,6 +4,7 @@ import { Routes, Route, Link, useNavigate, useMatch } from "react-router-dom";
 // services
 import blogService from "./services/blogs";
 import loginService from "./services/login";
+import userService from "./services/users";
 import { removeUser, saveUser } from "./services/persistentUser";
 // components
 import LoginForm from "./components/LoginForm";
@@ -19,6 +20,7 @@ import { useNotification } from "./hooks/useNotification";
 import { useUser } from "./contexts/UserContext";
 // style
 import { Container, AppBar, Toolbar, Button, Typography } from "@mui/material";
+import UserList from "./components/UserList";
 
 const App = () => {
   const { showNotification } = useNotification()
@@ -29,7 +31,12 @@ const App = () => {
   const { data: blogs = [], isPending, isError, error } = useQuery({
     queryKey: ['blogs'],
     queryFn: blogService.getAll,
-  })
+  });
+
+  const { data: users = [] } = useQuery({
+    queryKey: ['users'],
+    queryFn: userService.getAll,
+  });
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -177,6 +184,9 @@ const App = () => {
           <Button color="inherit" component={Link} to="/">
             blogs
           </Button>
+          <Button color="inherit" component={Link} to="/users">
+            users
+          </Button>
           <Button color="inherit" component={Link} to="/create">
             new blog
           </Button>
@@ -208,6 +218,8 @@ const App = () => {
           />
 
           <Route path="/" element={<BlogList blogs={sortedBlogsByLikes}/>}/>
+
+          <Route path="/users" element={<UserList users={users} />} />
 
           <Route path="/create" element={<CreateBlogForm createBlog={addBlog}/>} />
 
