@@ -15,11 +15,13 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import NotFound from "./components/NotFound";
 // hooks
 import { useNotification } from "./hooks/useNotification";
+import { useUser } from "./contexts/UserContext";
 // style
 import { Container, AppBar, Toolbar, Button, Typography } from "@mui/material";
 
 const App = () => {
   const { showNotification } = useNotification()
+  const { user, setUser } = useUser()
 
   const queryClient = useQueryClient()
 
@@ -30,19 +32,10 @@ const App = () => {
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [user, setUser] = useState(null);
 
   const navigate = useNavigate();
 
   const match = useMatch("/blogs/:id");
-
-  useEffect(() => {
-    const loggedUserJSON = window.localStorage.getItem("loggedBlogListUser");
-    if (loggedUserJSON) {
-      const user = JSON.parse(loggedUserJSON);
-      setUser(user);
-    }
-  }, []);
 
   const createBlogMutation = useMutation({
     mutationFn: blogService.create,
@@ -207,20 +200,13 @@ const App = () => {
             element={
               <Blog
                 blog={blog}
-                user={user}
                 updateBlog={updateBlog}
                 deleteBlog={deleteBlog}
               />
             }
           />
-          <Route
-            path="/"
-            element={
-              <BlogList
-                blogs={sortedBlogsByLikes}
-              />
-            }
-          />
+
+          <Route path="/" element={<BlogList blogs={sortedBlogsByLikes}/>}/>
 
           <Route path="/create" element={<CreateBlogForm createBlog={addBlog}/>} />
 

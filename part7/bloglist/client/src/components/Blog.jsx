@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useUser } from "../contexts/UserContext";
 import {
   Card,
   CardContent,
@@ -9,8 +10,9 @@ import {
   Stack,
 } from "@mui/material";
 
-const Blog = ({ blog, user, updateBlog, deleteBlog }) => {
+const Blog = ({ blog, updateBlog, deleteBlog }) => {
   const id = useParams().id;
+  const { user } = useUser()
   const navigate = useNavigate();
 
   const [viewBlog, setViewBlog] = useState(false);
