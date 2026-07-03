@@ -15,6 +15,7 @@ import CreateBlogForm from "./components/CreateBlogForm";
 import BlogList from "./components/BlogList";
 import ErrorBoundary from "./components/ErrorBoundary";
 import NotFound from "./components/NotFound";
+import User from "./components/User";
 // hooks
 import { useNotification } from "./hooks/useNotification";
 import { useUser } from "./contexts/UserContext";
@@ -44,6 +45,7 @@ const App = () => {
   const navigate = useNavigate();
 
   const match = useMatch("/blogs/:id");
+  const userMatch = useMatch("/users/:id")
 
   const createBlogMutation = useMutation({
     mutationFn: blogService.create,
@@ -172,6 +174,8 @@ const App = () => {
 
   const blog = match ? blogs.find((blog) => blog.id === match.params.id) : null;
 
+  const userId = userMatch ? users.find((user) => user.id === userMatch.params.id) : null;
+
   const sortedBlogsByLikes = [...blogs].sort((a, b) => b.likes - a.likes);
 
   return (
@@ -216,6 +220,8 @@ const App = () => {
               />
             }
           />
+
+          <Route path="/users/:id" element={<User user={userId} />} />
 
           <Route path="/" element={<BlogList blogs={sortedBlogsByLikes}/>}/>
 
