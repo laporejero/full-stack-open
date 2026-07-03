@@ -11,6 +11,15 @@ blogsRouter.get("/", async (request, response, next) => {
   response.json(blogs);
 });
 
+blogsRouter.get("/:id", async (request, response, next) => {
+  const blogs = await Blog.findById(request.params.id).populate("user", {
+    username: 1,
+    name: 1,
+    id: 1,
+  });
+  response.json(blogs);
+});
+
 blogsRouter.post("/", async (request, response, next) => {
   const body = request.body;
   const user = request.user;
@@ -82,6 +91,27 @@ blogsRouter.put("/:id", async (request, response, next) => {
   });
 
   response.status(200).json(populatedBlog);
+});
+
+blogsRouter.post("/:id/comments", async (request, response, next) => {
+  try {
+    const { comment } = request.body;
+
+    if (!comment || comment.trim() === "") {
+      return response.status(400).json({ error: "comment is required" });
+    }
+
+    const blog = await Blog.findById(request.params.id);
+
+    blog.comments = blog.comments || [];
+    blog.comments.push(comment);
+
+    const savedBlog = await blog.save()
+
+    response.status(201).json(savedBlog)
+  } catch (error) {
+    next(error)
+  }
 });
 
 module.exports = blogsRouter;

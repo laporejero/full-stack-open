@@ -74,6 +74,13 @@ const Blog = ({ blog, updateBlog, deleteBlog }) => {
             </Button>
           )}
         </Stack>
+
+        <Typography variant="h6" sx={{ marginTop: '20px' }}>comments</Typography>
+        <ul>
+          {blog.comments.map((comment, index) => (
+            <li key={index}>{comment}</li>
+          ))}
+        </ul>
       </CardContent>
     </Card>
   );
