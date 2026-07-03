@@ -8,14 +8,16 @@ import {
   Link,
   Button,
   Stack,
+  TextField,
 } from "@mui/material";
 
-const Blog = ({ blog, updateBlog, deleteBlog }) => {
+const Blog = ({ blog, updateBlog, deleteBlog, addComment }) => {
   const id = useParams().id;
   const { user } = useUser()
   const navigate = useNavigate();
 
   const [viewBlog, setViewBlog] = useState(false);
+  const [comment, setComment] = useState("")
 
   const toggleView = () => {
     setViewBlog(!viewBlog);
@@ -32,6 +34,12 @@ const Blog = ({ blog, updateBlog, deleteBlog }) => {
     deleteBlog(blog);
     navigate("/");
   };
+
+  const handleAddComment = async (event) => {
+    event.preventDefault();
+    await addComment(blog.id, comment)
+    setComment("")
+  }
 
   const blogStyle = {
     padding: 5,
@@ -76,6 +84,24 @@ const Blog = ({ blog, updateBlog, deleteBlog }) => {
         </Stack>
 
         <Typography variant="h6" sx={{ marginTop: '20px' }}>comments</Typography>
+        <form onSubmit={handleAddComment}>
+          <TextField 
+            value={comment}
+            onChange={(event) => setComment(event.target.value)}
+
+            placeholder="add a comment"
+            size="small"
+            sx={{ marginRight: "8px" }}
+          />
+          <Button 
+            type="submit" 
+            variant="contained"
+            sx={{ textTransform: 'uppercase' }}
+          >
+            add comment
+          </Button>
+        </form>
+
         <ul>
           {blog.comments.map((comment, index) => (
             <li key={index}>{comment}</li>

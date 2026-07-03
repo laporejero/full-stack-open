@@ -75,6 +75,16 @@ const App = () => {
     },
   });
 
+  const addCommentMutation = useMutation({
+    mutationFn: ({ id, comment }) => blogService.addComment(id, comment),
+    onSuccess: (updateBlog) => {
+      queryClient.setQueryData(['blogs'], (oldBlogs) =>
+        oldBlogs.map((blog) =>
+          blog.id === updateBlog.id ? updateBlog : blog
+        ));
+    },
+  });
+
   if (isPending) {
     return <div>Loading blogs...</div>
   }
@@ -170,6 +180,17 @@ const App = () => {
     }
   };
 
+  const addComment = async (id, comment) => {
+    try {
+      await addCommentMutation.mutateAsync({
+        id: id,
+        comment: comment,
+      });
+    } catch {
+      showNotification({ text: "failed to add comment", type: "error" });
+    }
+  };
+
   const padding = { padding: 5 };
 
   const blog = match ? blogs.find((blog) => blog.id === match.params.id) : null;
@@ -217,6 +238,7 @@ const App = () => {
                 blog={blog}
                 updateBlog={updateBlog}
                 deleteBlog={deleteBlog}
+                addComment={addComment}
               />
             }
           />
