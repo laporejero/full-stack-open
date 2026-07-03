@@ -9,6 +9,12 @@ import {
   Button,
   Stack,
   TextField,
+  TableRow,
+  TableContainer,
+  Table,
+  TableBody,
+  TableCell,
+  Paper,
 } from "@mui/material";
 
 const Blog = ({ blog, updateBlog, deleteBlog, addComment }) => {
@@ -102,11 +108,17 @@ const Blog = ({ blog, updateBlog, deleteBlog, addComment }) => {
           </Button>
         </form>
 
-        <ul>
-          {blog.comments.map((comment, index) => (
-            <li key={index}>{comment}</li>
-          ))}
-        </ul>
+        <TableContainer component={Paper} sx={{ width: {xs: '100%', md: '70%' }, marginTop: '10px' }}>
+            <Table>
+                <TableBody>
+                  {blog.comments.map((comment, index) => (
+                    <TableRow key={index}>
+                      <TableCell>{comment}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+            </Table>
+        </TableContainer>
       </CardContent>
     </Card>
   );
