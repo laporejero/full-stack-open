@@ -4,6 +4,7 @@ import { Routes, Route, Link, useNavigate, useMatch } from "react-router-dom";
 // services
 import blogService from "./services/blogs";
 import loginService from "./services/login";
+import { removeUser, saveUser } from "./services/persistentUser";
 // components
 import LoginForm from "./components/LoginForm";
 import Blog from "./components/Blog";
@@ -78,7 +79,7 @@ const App = () => {
     try {
       const user = await loginService.login({ username, password });
 
-      window.localStorage.setItem("loggedBlogListUser", JSON.stringify(user));
+      saveUser(user);
       blogService.setToken(user.token);
       setUser(user);
       setUsername("");
@@ -101,7 +102,7 @@ const App = () => {
 
   const handleLogout = (event) => {
     event.preventDefault();
-    window.localStorage.removeItem("loggedBlogListUser");
+    removeUser()
     setUser(null);
     navigate("/");
   };
